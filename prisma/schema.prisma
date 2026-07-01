@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Ingrediente {
+  id        String   @id @default(cuid())
+  nombre    String
+  descripcion String?
+  precio    Float
+  stock     Float    @default(0)
+  unidad    String   @default("kg")
+  categoria String   @default("General")
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  platosIngredientes  PlatoIngrediente[]
+  bolsonesIngredientes BolsonIngrediente[]
+}
+
+model Plato {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String?
+  precio      Float
+  stock       Int      @default(0)
+  activo      Boolean  @default(true)
+  imagen      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ingredientes PlatoIngrediente[]
+  pedidos      Pedido[]
+}
+
+model PlatoIngrediente {
+  platoId       String
+  ingredienteId String
+  cantidad      Float
+
+  plato       Plato       @relation(fields: [platoId], references: [id], onDelete: Cascade)
+  ingrediente Ingrediente @relation(fields: [ingredienteId], references: [id], onDelete: Cascade)
+
+  @@id([platoId, ingredienteId])
+}
+
+model Bolson {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String?
+  tipo        String   @default("GENERAL")
+  precio      Float
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ingredientes BolsonIngrediente[]
+  pedidos      Pedido[]
+}
+
+model BolsonIngrediente {
+  bolsonId      String
+  ingredienteId String
+  cantidad      Float
+
+  bolson      Bolson      @relation(fields: [bolsonId], references: [id], onDelete: Cascade)
+  ingrediente Ingrediente @relation(fields: [ingredienteId], references: [id], onDelete: Cascade)
+
+  @@id([bolsonId, ingredienteId])
+}
+
+model Cliente {
+  id        String   @id @default(cuid())
+  nombre    String
+  telefono  String?
+  email     String?
+  direccion String?
+  notas     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pedidos Pedido[]
+}
+
+model Pedido {
+  id         String   @id @default(cuid())
+  clienteId  String
+  tipo       String   @default("PLATO")
+  platoId    String?
+  bolsonId   String?
+  cantidad   Int      @default(1)
+  estado     String   @default("PENDIENTE")
+  notas      String?
+  total      Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  plato   Plato?  @relation(fields: [platoId], references: [id], onDelete: SetNull)
+  bolson  Bolson? @relation(fields: [bolsonId], references: [id], onDelete: SetNull)
+}
