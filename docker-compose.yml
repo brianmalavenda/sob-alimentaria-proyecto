@@ -9,11 +9,11 @@ services:
       - .env
     environment:
       - DATABASE_URL=file:./db/custom.db
-      - NEXTAUTH_URL=http://sob.local        # o la IP/hostname que uses en la LAN
+      - NEXTAUTH_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
     volumes:
-      - /db:/app/db                        # persistencia de la base sqlite
-    expose:
-      - "3000"
+      - ./db:/app/db                        # persistencia de la base sqlite
     networks:
       - sob_net
 

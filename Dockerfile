@@ -14,7 +14,7 @@ RUN bunx prisma generate
 RUN bun run build
 
 # ---- runner ----
-FROM oven/bun:1-slim AS runner
+FROM oven/bun:1 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -29,9 +29,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY entrypoint.sh /app/entrypoint.sh
 COPY initialize_prisma.sh /app/initialize_prisma.sh
 RUN chmod +x /app/entrypoint.sh /app/initialize_prisma.sh
