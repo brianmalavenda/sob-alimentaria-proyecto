@@ -132,7 +132,7 @@ export default function AppShell() {
             <p className="text-xs text-gray-500">
               {activeSection === 'platos' && 'Gestioná tus platos del menú'}
               {activeSection === 'ingredientes' && 'Administrá insumos y actualizá precios'}
-              {activeSection === 'bolsones' && 'Gestioná bolsones por tipo de cliente'}
+              {activeSection === 'bolsones' && 'Gestioná bolsones por tipo de consumidor'}
               {activeSection === 'ticketera' && 'Pedidos y tickets de entrega'}
             </p>
           </div>

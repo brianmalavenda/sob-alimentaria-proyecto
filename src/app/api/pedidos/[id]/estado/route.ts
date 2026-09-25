@@ -11,7 +11,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const pedido = await db.pedido.update({
       where: { id },
       data: { estado },
-      include: { cliente: true, plato: true, bolson: true },
+      include: { consumidor: true, plato: true, bolson: true },
     })
     return NextResponse.json(pedido)
   } catch (error) {

@@ -1,0 +1,16 @@
+# frontend/Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+# Exponemos el puerto de Vite
+EXPOSE 5173
+
+# Iniciamos Vite vinculándolo a la red del contenedor
+CMD ["npm", "run", "dev", "--", "--host"]

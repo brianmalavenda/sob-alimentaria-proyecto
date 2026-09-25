@@ -3,7 +3,7 @@ import { db } from '../src/lib/db'
 async function main() {
   // Limpiar datos existentes
   await db.pedido.deleteMany()
-  await db.cliente.deleteMany()
+  await db.consumidor.deleteMany()
   await db.platoIngrediente.deleteMany()
   await db.bolsonIngrediente.deleteMany()
   await db.plato.deleteMany()
@@ -215,24 +215,24 @@ async function main() {
     }
   })
 
-  // === CLIENTES ===
-  const cliente1 = await db.cliente.create({
+  // === consumidorS ===
+  const consumidor1 = await db.consumidor.create({
     data: { nombre: 'María García', telefono: '1155001234', email: 'maria@email.com', direccion: 'Av. San Martín 234' }
   })
-  const cliente2 = await db.cliente.create({
+  const consumidor2 = await db.consumidor.create({
     data: { nombre: 'Juan Pérez', telefono: '1155005678', email: 'juan@email.com', direccion: 'Calle Mitre 567' }
   })
-  const cliente3 = await db.cliente.create({
+  const consumidor3 = await db.consumidor.create({
     data: { nombre: 'Ana López', telefono: '1155009012', email: 'ana@email.com', direccion: 'Bv. España 890' }
   })
-  const cliente4 = await db.cliente.create({
+  const consumidor4 = await db.consumidor.create({
     data: { nombre: 'Carlos Rodríguez', telefono: '1155003456', email: 'carlos@email.com', direccion: 'Pasaje Colón 123' }
   })
 
   // === PEDIDOS ===
   await db.pedido.create({
     data: {
-      clienteId: cliente1.id,
+      consumidorId: consumidor1.id,
       tipo: 'PLATO',
       platoId: plato1.id,
       cantidad: 3,
@@ -243,7 +243,7 @@ async function main() {
   })
   await db.pedido.create({
     data: {
-      clienteId: cliente2.id,
+      consumidorId: consumidor2.id,
       tipo: 'PLATO',
       platoId: plato3.id,
       cantidad: 2,
@@ -253,18 +253,18 @@ async function main() {
   })
   await db.pedido.create({
     data: {
-      clienteId: cliente3.id,
+      consumidorId: consumidor3.id,
       tipo: 'BOLSON',
       bolsonId: bolson3.id,
       cantidad: 1,
       estado: 'EN_PREPARACION',
       total: 12000,
-      notas: 'Cliente diabético, verificar todos los ingredientes'
+      notas: 'consumidor diabético, verificar todos los ingredientes'
     }
   })
   await db.pedido.create({
     data: {
-      clienteId: cliente4.id,
+      consumidorId: consumidor4.id,
       tipo: 'BOLSON',
       bolsonId: bolson4.id,
       cantidad: 1,
@@ -274,7 +274,7 @@ async function main() {
   })
   await db.pedido.create({
     data: {
-      clienteId: cliente1.id,
+      consumidorId: consumidor1.id,
       tipo: 'PLATO',
       platoId: plato5.id,
       cantidad: 1,
@@ -287,7 +287,7 @@ async function main() {
   console.log(`- 22 ingredientes`)
   console.log(`- 5 platos`)
   console.log(`- 4 bolsones`)
-  console.log(`- 4 clientes`)
+  console.log(`- 4 consumidors`)
   console.log(`- 5 pedidos`)
 }
 

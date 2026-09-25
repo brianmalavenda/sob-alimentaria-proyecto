@@ -3,39 +3,72 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+model Usuario {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String // Acá se guardará el hash (ej: con bcrypt), nunca el texto plano
+  nombre    String
+  rol       String    @default("ADMIN") // ADMIN, USER, CAMARERO
+  activo    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  auditorias Auditoria[] // Relación correcta: Un usuario hace muchas auditorías
+
+  @@map("usuarios")
+}
+
+model Auditoria {
+  id         String    @id @default(cuid())
+  usuarioId  String?
+  usuario    Usuario?  @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  accion     String   // Ej: "CREATE", "UPDATE", "DELETE"
+  tabla      String   // Ej: "platos", "ingredientes"
+  idTabla    String?  // El ID del plato o ingrediente modificado
+  detalles   String?  // Ej: "Precio actualizado de 1000 a 1500"
+  fecha      DateTime  @default(now())
+  ip         String?
+
+  @@map("auditoria")
+}
+
 model Ingrediente {
-  id        String   @id @default(cuid())
+  id        String       @id @default(cuid())
   nombre    String
   descripcion String?
   precio    Float
-  stock     Float    @default(0)
-  unidad    String   @default("kg")
-  categoria String   @default("General")
-  activo    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  stock     Float          @default(0)
+  unidad    String         @default("kg")
+  categoria String         @default("General")
+  activo    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 
   platosIngredientes  PlatoIngrediente[]
   bolsonesIngredientes BolsonIngrediente[]
+
+  @@map("ingredientes")
 }
 
 model Plato {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   nombre      String
   descripcion String?
   precio      Float
-  stock       Int      @default(0)
-  activo      Boolean  @default(true)
+  stock       Int          @default(0)
+  activo      Boolean      @default(true)
   imagen      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   ingredientes PlatoIngrediente[]
   pedidos      Pedido[]
+
+  @@map("platos")
 }
 
 model PlatoIngrediente {
@@ -50,17 +83,19 @@ model PlatoIngrediente {
 }
 
 model Bolson {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   nombre      String
   descripcion String?
-  tipo        String   @default("GENERAL")
+  tipo        String         @default("GENERAL")
   precio      Float
-  activo      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  activo      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   ingredientes BolsonIngrediente[]
   pedidos      Pedido[]
+
+  @@map("bolsones")
 }
 
 model BolsonIngrediente {
@@ -74,33 +109,37 @@ model BolsonIngrediente {
   @@id([bolsonId, ingredienteId])
 }
 
-model Cliente {
-  id        String   @id @default(cuid())
+model Consumidor {
+  id        String       @id @default(cuid())
   nombre    String
   telefono  String?
   email     String?
   direccion String?
   notas     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   pedidos Pedido[]
+
+  @@map("consumidor")
 }
 
 model Pedido {
-  id         String   @id @default(cuid())
-  clienteId  String
-  tipo       String   @default("PLATO")
+  id         String      @id @default(cuid())
+  consumidorId  String
+  tipo       String      @default("PLATO")
   platoId    String?
   bolsonId   String?
-  cantidad   Int      @default(1)
-  estado     String   @default("PENDIENTE")
+  cantidad   Int         @default(1)
+  estado     String      @default("PENDIENTE")
   notas      String?
   total      Float
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
-  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  consumidor Consumidor @relation(fields: [consumidorId], references: [id], onDelete: Cascade)
   plato   Plato?  @relation(fields: [platoId], references: [id], onDelete: SetNull)
   bolson  Bolson? @relation(fields: [bolsonId], references: [id], onDelete: SetNull)
+
+  @@map("pedidos")
 }
