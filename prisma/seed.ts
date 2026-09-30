@@ -1,7 +1,12 @@
-import { db } from '../src/lib/db'
+import { PrismaClient } from '@prisma/client'
+
+const db = new PrismaClient()
 
 async function main() {
-  // Limpiar datos existentes
+  console.log('🌱 Iniciando la carga de datos (seed)...')
+
+  // 1. Limpiar datos existentes en orden estricto de dependencias
+  console.log('🧹 Limpiando base de datos...')
   await db.pedido.deleteMany()
   await db.cliente.deleteMany()
   await db.platoIngrediente.deleteMany()
@@ -10,36 +15,52 @@ async function main() {
   await db.bolson.deleteMany()
   await db.ingrediente.deleteMany()
 
-  // === INGREDIENTES ===
-  const ingredientes = await Promise.all([
-    db.ingrediente.create({ data: { nombre: 'Pechuga de pollo', descripcion: 'Pechuga de pollo fresca', precio: 4500, stock: 20, unidad: 'kg', categoria: 'Carnes' } }),
-    db.ingrediente.create({ data: { nombre: 'Carne molida', descripcion: 'Carne molida magra', precio: 5200, stock: 15, unidad: 'kg', categoria: 'Carnes' } }),
-    db.ingrediente.create({ data: { nombre: 'Costilla de cerdo', descripcion: 'Costilla de cerdo fresca', precio: 4800, stock: 10, unidad: 'kg', categoria: 'Carnes' } }),
-    db.ingrediente.create({ data: { nombre: 'Arroz', descripcion: 'Arroz largo fino', precio: 1200, stock: 30, unidad: 'kg', categoria: 'Cereales' } }),
-    db.ingrediente.create({ data: { nombre: 'Papa', descripcion: 'Papa blanca', precio: 800, stock: 25, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Zanahoria', descripcion: 'Zanahoria fresca', precio: 700, stock: 15, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Cebolla', descripcion: 'Cebolla cabezona', precio: 600, stock: 20, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Tomate', descripcion: 'Tomate perita', precio: 900, stock: 18, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Morrón rojo', descripcion: 'Morrón rojo fresco', precio: 1100, stock: 10, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Aceite de girasol', descripcion: 'Aceite de girasol 1L', precio: 1800, stock: 12, unidad: 'L', categoria: 'Aceites' } }),
-    db.ingrediente.create({ data: { nombre: 'Sal', descripcion: 'Sal fina', precio: 400, stock: 10, unidad: 'kg', categoria: 'Condimentos' } }),
-    db.ingrediente.create({ data: { nombre: 'Pimienta', descripcion: 'Pimienta negra molida', precio: 3500, stock: 3, unidad: 'kg', categoria: 'Condimentos' } }),
-    db.ingrediente.create({ data: { nombre: 'Ajo', descripcion: 'Ajo fresco', precio: 2500, stock: 5, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Limón', descripcion: 'Limón fresco', precio: 1500, stock: 8, unidad: 'kg', categoria: 'Frutas' } }),
-    db.ingrediente.create({ data: { nombre: 'Lechuga', descripcion: 'Lechuga crespa', precio: 800, stock: 10, unidad: 'kg', categoria: 'Verduras' } }),
-    db.ingrediente.create({ data: { nombre: 'Huevo', descripcion: 'Huevo de gallina (docena)', precio: 2200, stock: 20, unidad: 'docena', categoria: 'Lácteos' } }),
-    db.ingrediente.create({ data: { nombre: 'Harina de trigo', descripcion: 'Harina 000', precio: 900, stock: 25, unidad: 'kg', categoria: 'Cereales' } }),
-    db.ingrediente.create({ data: { nombre: 'Harina de maíz', descripcion: 'Harina de maíz sin TACC', precio: 1500, stock: 15, unidad: 'kg', categoria: 'Cereales' } }),
-    db.ingrediente.create({ data: { nombre: 'Queso rallado', descripcion: 'Queso rallado', precio: 6000, stock: 8, unidad: 'kg', categoria: 'Lácteos' } }),
-    db.ingrediente.create({ data: { nombre: 'Salsa de tomate', descripcion: 'Salsa de tomate casera', precio: 2000, stock: 10, unidad: 'L', categoria: 'Salsas' } }),
-    db.ingrediente.create({ data: { nombre: 'Edulcorante', descripcion: 'Edulcorante apto diabéticos', precio: 3500, stock: 10, unidad: 'kg', categoria: 'Especiales' } }),
-    db.ingrediente.create({ data: { nombre: 'Stevia', descripcion: 'Stevia en polvo', precio: 5000, stock: 5, unidad: 'kg', categoria: 'Especiales' } }),
-  ])
+  // 2. Crear todos los ingredientes base
+  console.log('🥦 Creando ingredientes...')
+  const listaIngredientes = [
+    { nombre: 'Pechuga de pollo', unidad: 'KG' },
+    { nombre: 'Arroz', unidad: 'KG' },
+    { nombre: 'Zanahoria', unidad: 'KG' },
+    { nombre: 'Morrón rojo', unidad: 'KG' },
+    { nombre: 'Cebolla', unidad: 'KG' },
+    { nombre: 'Ajo', unidad: 'KG' },
+    { nombre: 'Aceite de girasol', unidad: 'L' },
+    { nombre: 'Sal', unidad: 'KG' },
+    { nombre: 'Carne molida', unidad: 'KG' },
+    { nombre: 'Huevo', unidad: 'UNIDAD' },
+    { nombre: 'Harina de trigo', unidad: 'KG' },
+    { nombre: 'Papa', unidad: 'KG' },
+    { nombre: 'Limón', unidad: 'KG' },
+    { nombre: 'Costilla de cerdo', unidad: 'KG' },
+    { nombre: 'Lechuga', unidad: 'KG' },
+    { nombre: 'Tomate', unidad: 'KG' },
+    { nombre: 'Pimienta', unidad: 'KG' },
+    { nombre: 'Edulcorante', unidad: 'UNIDAD' },
+    { nombre: 'Stevia', unidad: 'UNIDAD' },
+    { nombre: 'Harina de maíz', unidad: 'KG' },
+    { nombre: 'Queso rallado', unidad: 'KG' },
+  ]
 
-  // Helper
-  const ing = (nombre: string) => ingredientes.find(i => i.nombre === nombre)!
+  const ingredientesMap = new Map<string, any>()
 
-  // === PLATOS ===
+  for (const item of listaIngredientes) {
+    const created = await db.ingrediente.create({
+      data: item,
+    })
+    ingredientesMap.set(item.nombre, created)
+  }
+
+  // Helper de búsqueda segura por nombre
+  const ing = (nombre: string) => {
+    const encontrado = ingredientesMap.get(nombre)
+    if (!encontrado) {
+      throw new Error(`El ingrediente "${nombre}" no existe en el mapa de semillas.`)
+    }
+    return encontrado
+  }
+
+  // 3. Crear Platos
+  console.log('🍽️ Creando platos...')
   const plato1 = await db.plato.create({
     data: {
       nombre: 'Arroz con Pollo',
@@ -56,9 +77,9 @@ async function main() {
           { ingredienteId: ing('Ajo').id, cantidad: 0.01 },
           { ingredienteId: ing('Aceite de girasol').id, cantidad: 0.03 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato2 = await db.plato.create({
@@ -76,9 +97,9 @@ async function main() {
           { ingredienteId: ing('Aceite de girasol').id, cantidad: 0.1 },
           { ingredienteId: ing('Limón').id, cantidad: 0.05 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato3 = await db.plato.create({
@@ -97,9 +118,9 @@ async function main() {
           { ingredienteId: ing('Ajo').id, cantidad: 0.01 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
           { ingredienteId: ing('Pimienta').id, cantidad: 0.002 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato4 = await db.plato.create({
@@ -115,9 +136,9 @@ async function main() {
           { ingredienteId: ing('Cebolla').id, cantidad: 0.1 },
           { ingredienteId: ing('Aceite de girasol').id, cantidad: 0.05 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato5 = await db.plato.create({
@@ -136,16 +157,17 @@ async function main() {
           { ingredienteId: ing('Pimienta').id, cantidad: 0.005 },
           { ingredienteId: ing('Sal').id, cantidad: 0.01 },
           { ingredienteId: ing('Ajo').id, cantidad: 0.02 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
-  // === BOLSONES ===
+  // 4. Crear Bolsones
+  console.log('🛍️ Creando bolsones...')
   const bolson1 = await db.bolson.create({
     data: {
       nombre: 'Bolsón Carnicero',
-      descripcion: 'Seleccion de cortes de carne para la semana. Ideal para familias.',
+      descripcion: 'Selección de cortes de carne para la semana. Ideal para familias.',
       tipo: 'GENERAL',
       precio: 18000,
       ingredientes: {
@@ -153,15 +175,15 @@ async function main() {
           { ingredienteId: ing('Pechuga de pollo').id, cantidad: 1.5 },
           { ingredienteId: ing('Carne molida').id, cantidad: 1 },
           { ingredienteId: ing('Costilla de cerdo').id, cantidad: 1 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const bolson2 = await db.bolson.create({
     data: {
       nombre: 'Bolsón Verduras',
-      descripcion: 'Seleccion de verduras frescas de temporada. Paquete completo para la semana.',
+      descripcion: 'Selección de verduras frescas de temporada. Paquete completo para la semana.',
       tipo: 'GENERAL',
       precio: 8500,
       ingredientes: {
@@ -172,9 +194,9 @@ async function main() {
           { ingredienteId: ing('Tomate').id, cantidad: 1.5 },
           { ingredienteId: ing('Morrón rojo').id, cantidad: 0.5 },
           { ingredienteId: ing('Lechuga').id, cantidad: 1 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const bolson3 = await db.bolson.create({
@@ -191,9 +213,9 @@ async function main() {
           { ingredienteId: ing('Zanahoria').id, cantidad: 1 },
           { ingredienteId: ing('Edulcorante').id, cantidad: 0.5 },
           { ingredienteId: ing('Stevia').id, cantidad: 0.2 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const bolson4 = await db.bolson.create({
@@ -210,26 +232,28 @@ async function main() {
           { ingredienteId: ing('Tomate').id, cantidad: 1 },
           { ingredienteId: ing('Huevo').id, cantidad: 1 },
           { ingredienteId: ing('Queso rallado').id, cantidad: 0.5 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
-  // === CLIENTES ===
+  // 5. Crear Clientes
+  console.log('👤 Creando clientes...')
   const cliente1 = await db.cliente.create({
-    data: { nombre: 'María García', telefono: '1155001234', email: 'maria@email.com', direccion: 'Av. San Martín 234' }
+    data: { nombre: 'María García', telefono: '1155001234', email: 'maria@email.com', direccion: 'Av. San Martín 234' },
   })
   const cliente2 = await db.cliente.create({
-    data: { nombre: 'Juan Pérez', telefono: '1155005678', email: 'juan@email.com', direccion: 'Calle Mitre 567' }
+    data: { nombre: 'Juan Pérez', telefono: '1155005678', email: 'juan@email.com', direccion: 'Calle Mitre 567' },
   })
   const cliente3 = await db.cliente.create({
-    data: { nombre: 'Ana López', telefono: '1155009012', email: 'ana@email.com', direccion: 'Bv. España 890' }
+    data: { nombre: 'Ana López', telefono: '1155009012', email: 'ana@email.com', direccion: 'Bv. España 890' },
   })
   const cliente4 = await db.cliente.create({
-    data: { nombre: 'Carlos Rodríguez', telefono: '1155003456', email: 'carlos@email.com', direccion: 'Pasaje Colón 123' }
+    data: { nombre: 'Carlos Rodríguez', telefono: '1155003456', email: 'carlos@email.com', direccion: 'Pasaje Colón 123' },
   })
 
-  // === PEDIDOS ===
+  // 6. Crear Pedidos
+  console.log('📦 Creando pedidos...')
   await db.pedido.create({
     data: {
       clienteId: cliente1.id,
@@ -238,8 +262,8 @@ async function main() {
       cantidad: 3,
       estado: 'ENTREGADO',
       total: 16500,
-      notas: 'Sin morrón por favor'
-    }
+      notas: 'Sin morrón por favor',
+    },
   })
   await db.pedido.create({
     data: {
@@ -249,7 +273,7 @@ async function main() {
       cantidad: 2,
       estado: 'LISTO',
       total: 15000,
-    }
+    },
   })
   await db.pedido.create({
     data: {
@@ -259,8 +283,8 @@ async function main() {
       cantidad: 1,
       estado: 'EN_PREPARACION',
       total: 12000,
-      notas: 'Cliente diabético, verificar todos los ingredientes'
-    }
+      notas: 'Cliente diabético, verificar todos los ingredientes',
+    },
   })
   await db.pedido.create({
     data: {
@@ -270,7 +294,7 @@ async function main() {
       cantidad: 1,
       estado: 'PENDIENTE',
       total: 14000,
-    }
+    },
   })
   await db.pedido.create({
     data: {
@@ -280,17 +304,18 @@ async function main() {
       cantidad: 1,
       estado: 'PENDIENTE',
       total: 8000,
-    }
+    },
   })
 
-  console.log('✅ Seed data creado exitosamente!')
-  console.log(`- 22 ingredientes`)
-  console.log(`- 5 platos`)
-  console.log(`- 4 bolsones`)
-  console.log(`- 4 clientes`)
-  console.log(`- 5 pedidos`)
+  console.log('✅ Base de datos poblada exitosamente.')
 }
 
 main()
-  .catch(e => { console.error(e); process.exit(1) })
-  .finally(() => db.$disconnect())
+  .then(async () => {
+    await db.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error('❌ Error ejecutando el seed:', e)
+    await db.$disconnect()
+    process.exit(1)
+  })
