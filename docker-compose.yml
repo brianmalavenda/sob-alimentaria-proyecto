@@ -1,7 +1,7 @@
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: postgres_comidas
+    image: postgres:16-alpine
+    container_name: sob-alimentaria-db
     restart: always
     env_file:
       - .env
@@ -21,6 +21,19 @@ services:
       timeout: 5s
       retries: 10
 
+    # image: postgres:16-alpine
+    # container_name: sob-alimentaria-db
+    # restart: unless-stopped
+    # environment:
+    #   POSTGRES_USER: sob_user
+    #   POSTGRES_PASSWORD: sob_password
+    #   POSTGRES_DB: sob_db
+    # ports:
+    #   - "5432:5432"
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data
+    # networks:
+    #   - sob_net
   app:
     build:
       context: .
@@ -28,13 +41,12 @@ services:
     container_name: sob-alimentaria-app
     restart: unless-stopped
     depends_on:
-      - postgres  
-    env_file:
-      - .env
+      - postgres:
+          condition: service_healthy      
     environment:
       - DEBUG=${DEBUG:-false}
-      - DATABASE_URL
-      - NEXTAUTH_URL
+      - DATABASE_URL=postgresql://sob_user:sob_password@postgres:5432/sob_db?schema=public
+      - NEXTAUTH_URL=http://localhost:3000
     command: >
       sh -c "
         npx prisma migrate deploy &&
@@ -44,9 +56,6 @@ services:
         fi &&
         npm run start:prod
       "
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
       - "3000:3000"
     volumes:
@@ -78,3 +87,6 @@ services:
 networks:
   sob_net:
     driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,4 +1,7 @@
-import { db } from '../src/lib/db'
+import { PrismaClient } from '@prisma/client'
+
+// 1. Instancia independiente de Prisma
+const db = new PrismaClient()
 
 // Historial de precios dummy (auditoría) para cada ingrediente.
 // Sirve para que el "Observatorio de Precios" tenga datos de ejemplo apenas
@@ -31,7 +34,8 @@ const HISTORIAL_PRECIOS_DUMMY: Record<string, { fecha: string; precio: number; m
 }
 
 async function main() {
-  // Limpiar datos existentes
+  // 2. Limpieza en orden estricto de dependencias (de hijas a padres)
+  console.log('🧹 Limpiando base de datos...')
   await db.historialPrecio.deleteMany()
   await db.pedido.deleteMany()
   await db.consumidor.deleteMany()
@@ -40,6 +44,8 @@ async function main() {
   await db.plato.deleteMany()
   await db.bolson.deleteMany()
   await db.ingrediente.deleteMany()
+
+  console.log('🌱 Iniciando la carga de datos (seed)...')
 
   // === INGREDIENTES ===
   const ingredientes = await Promise.all([
