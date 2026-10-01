@@ -4,3 +4,5 @@
 
 2. La aplicación contaría con un sistema de login de usuarios donde cargaría cada uno el ticket e ingresaría, para los usuarios con perfil "cocineros", en el sistema de pedidos para preparar. 
 
+
+docker exec -it sob-alimentaria-app bunx prisma db seed

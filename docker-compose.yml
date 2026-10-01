@@ -3,8 +3,6 @@ services:
     image: postgres:16-alpine
     container_name: sob-alimentaria-db
     restart: always
-    env_file:
-      - .env
     environment:
       - POSTGRES_USER=admin_negocio
       - POSTGRES_PASSWORD=clave_segura_123
@@ -16,12 +14,52 @@ services:
     networks:
       - sob_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin_negocio -d comidas_db"]
+      test: ["CMD-SHELL", "pg_isready -U admin_negocio"]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
 
-    # image: postgres:16-alpine
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sob-alimentaria-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy      
+    environment:
+      - DEBUG=${DEBUG:-false}
+      - DATABASE_URL=postgresql://admin_negocio:clave_segura_123@postgres:5432/sob_db?schema=public
+      - NEXTAUTH_URL=http://localhost:3000
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        if [ \"$$DEBUG\" = \"true\" ]; then
+          echo '=== MODO DEBUG DETECTADO: Ejecutando seed... ===' &&
+          npx prisma db seed;
+        fi &&
+        npm run start:prod
+      "git
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./db:/app/db
+    networks:
+      - sob_net
+
+networks:
+  sob_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
+
+## NOTAS  de implementaciones anteriores
+
+  # image: postgres:16-alpine
     # container_name: sob-alimentaria-db
     # restart: unless-stopped
     # environment:
@@ -34,35 +72,7 @@ services:
     #   - postgres_data:/var/lib/postgresql/data
     # networks:
     #   - sob_net
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: sob-alimentaria-app
-    restart: unless-stopped
-    depends_on:
-      - postgres:
-          condition: service_healthy      
-    environment:
-      - DEBUG=${DEBUG:-false}
-      - DATABASE_URL=postgresql://sob_user:sob_password@postgres:5432/sob_db?schema=public
-      - NEXTAUTH_URL=http://localhost:3000
-    command: >
-      sh -c "
-        npx prisma migrate deploy &&
-        if [ \"$$DEBUG\" = \"true\" ]; then
-          echo '=== MODO DEBUG DETECTADO: Ejecutando seed... ===' &&
-          npx prisma db seed;
-        fi &&
-        npm run start:prod
-      "
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./db:/app/db
-    networks:
-      - sob_net
-
+    
   # caddy:
   #   image: caddy:2-alpine
   #   container_name: sob-alimentaria-caddy
@@ -83,10 +93,3 @@ services:
 #   sob_db:
   # caddy_data:
   # caddy_config:
-
-networks:
-  sob_net:
-    driver: bridge
-
-volumes:
-  postgres_data:
