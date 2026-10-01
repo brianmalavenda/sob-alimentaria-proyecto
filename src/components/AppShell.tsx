@@ -11,11 +11,13 @@ import {
   Menu,
   X,
   Store,
+  LineChart,
 } from 'lucide-react'
 import PlatosSection from '@/components/sections/PlatosSection'
 import IngredientesSection from '@/components/sections/IngredientesSection'
 import BolsonesSection from '@/components/sections/BolsonesSection'
 import TicketeraSection from '@/components/sections/TicketeraSection'
+import ObservatorioPreciosSection from '@/components/sections/ObservatorioPreciosSection'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navItems = [
@@ -23,6 +25,7 @@ const navItems = [
   { id: 'ingredientes' as const, label: 'Ingredientes', icon: Carrot },
   { id: 'bolsones' as const, label: 'Bolsones', icon: Package },
   { id: 'ticketera' as const, label: 'Ticketera', icon: Ticket },
+  { id: 'observatorio' as const, label: 'Observatorio de Precios', icon: LineChart },
 ]
 
 export default function AppShell() {
@@ -134,6 +137,7 @@ export default function AppShell() {
               {activeSection === 'ingredientes' && 'Administrá insumos y actualizá precios'}
               {activeSection === 'bolsones' && 'Gestioná bolsones por tipo de consumidor'}
               {activeSection === 'ticketera' && 'Pedidos y tickets de entrega'}
+              {activeSection === 'observatorio' && 'Evolución y auditoría de precios de ingredientes'}
             </p>
           </div>
         </header>
@@ -152,6 +156,7 @@ export default function AppShell() {
               {activeSection === 'ingredientes' && <IngredientesSection />}
               {activeSection === 'bolsones' && <BolsonesSection />}
               {activeSection === 'ticketera' && <TicketeraSection />}
+              {activeSection === 'observatorio' && <ObservatorioPreciosSection />}
             </motion.div>
           </AnimatePresence>
         </main>

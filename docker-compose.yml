@@ -1,19 +1,56 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_comidas
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=admin_negocio
+      - POSTGRES_PASSWORD=clave_segura_123
+      - POSTGRES_DB=comidas_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/postgres-data:/var/lib/postgresql/data
+    networks:
+      - sob_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_negocio -d comidas_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: sob-alimentaria-app
     restart: unless-stopped
+    depends_on:
+      - postgres  
     env_file:
       - .env
     environment:
+      - DEBUG=${DEBUG:-false}
       - DATABASE_URL
       - NEXTAUTH_URL
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        if [ \"$$DEBUG\" = \"true\" ]; then
+          echo '=== MODO DEBUG DETECTADO: Ejecutando seed... ===' &&
+          npx prisma db seed;
+        fi &&
+        npm run start:prod
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "3000:3000"
     volumes:
-      - ./db:/app/db                        # persistencia de la base sqlite
+      - ./db:/app/db
     networks:
       - sob_net
 
