@@ -1,7 +1,13 @@
-import { db } from '../src/lib/db'
+import { PrismaClient } from '@prisma/client'
+
+// 1. Instancia independiente de Prisma
+const db = new PrismaClient()
 
 async function main() {
-  // Limpiar datos existentes
+  console.log('🌱 Iniciando la carga de datos (seed)...')
+
+  // 2. Limpieza en orden estricto de dependencias (de hijas a padres)
+  console.log('🧹 Limpiando base de datos...')
   await db.pedido.deleteMany()
   await db.consumidor.deleteMany()
   await db.platoIngrediente.deleteMany()

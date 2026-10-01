@@ -1,21 +1,37 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sob-alimentaria-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sob_user
+      POSTGRES_PASSWORD: sob_password
+      POSTGRES_DB: sob_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sob_net
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: sob-alimentaria-app
     restart: unless-stopped
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     environment:
-      - DATABASE_URL
-      - NEXTAUTH_URL
+      - DATABASE_URL=postgresql://sob_user:sob_password@postgres:5432/sob_db?schema=public
+      - NEXTAUTH_URL=http://localhost:3000
     ports:
       - "3000:3000"
     volumes:
-      - ./db:/app/db                        # persistencia de la base sqlite
+      - ./db:/app/d                    
     networks:
       - sob_net
+    # Comando de runtime que sincroniza el esquema, ejecuta el seed y arranca la app
+    command: sh -c "bunx prisma db push && bun prisma/seed.ts && bun run dev"
 
   # caddy:
   #   image: caddy:2-alpine
@@ -41,3 +57,6 @@ services:
 networks:
   sob_net:
     driver: bridge
+
+volumes:
+  postgres_data:
