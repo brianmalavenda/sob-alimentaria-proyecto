@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const [totalPlatos, totalBolsones, totalClientes, pedidosPendientes, pedidosPreparacion, pedidosListos, pedidosEntregados, pedidosHoy, recentPedidos] = await Promise.all([
+    const [totalPlatos, totalBolsones, totalConsumidores, pedidosPendientes, pedidosPreparacion, pedidosListos, pedidosEntregados, pedidosHoy, recentPedidos] = await Promise.all([
       db.plato.count({ where: { activo: true } }),
       db.bolson.count({ where: { activo: true } }),
-      db.cliente.count(),
+      db.consumidor.count(),
       db.pedido.count({ where: { estado: 'PENDIENTE' } }),
       db.pedido.count({ where: { estado: 'EN_PREPARACION' } }),
       db.pedido.count({ where: { estado: 'LISTO' } }),
@@ -20,7 +20,7 @@ export async function GET() {
       }),
       db.pedido.findMany({
         take: 5,
-        include: { cliente: true, plato: true, bolson: true },
+        include: { consumidor: true, plato: true, bolson: true },
         orderBy: { createdAt: 'desc' },
       }),
     ])
@@ -28,7 +28,7 @@ export async function GET() {
     return NextResponse.json({
       totalPlatos,
       totalBolsones,
-      totalClientes,
+      totalConsumidores,
       pedidosPorEstado: {
         PENDIENTE: pedidosPendientes,
         EN_PREPARACION: pedidosPreparacion,

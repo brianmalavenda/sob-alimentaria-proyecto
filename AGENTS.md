@@ -1,0 +1,1 @@
+"Cuando el usuario pida modificar un archivo, leelo y editalo vos mismo usando las herramientas disponibles; no le pidas al usuario que ejecute comandos manualmente salvo que sea estrictamente necesario."

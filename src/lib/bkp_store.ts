@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type Section = 'platos' | 'ingredientes' | 'bolsones' | 'ticketera' | 'observatorio'
+type Section = 'platos' | 'ingredientes' | 'bolsones' | 'ticketera'
 
 interface AppState {
   activeSection: Section

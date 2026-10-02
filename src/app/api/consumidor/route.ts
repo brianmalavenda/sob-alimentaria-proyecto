@@ -8,13 +8,13 @@ export async function GET(request: NextRequest) {
     const where = search
       ? { nombre: { contains: search } as never }
       : {}
-    const clientes = await db.cliente.findMany({
+    const consumidores = await db.consumidor.findMany({
       where,
       orderBy: { nombre: 'asc' },
     })
-    return NextResponse.json(clientes)
+    return NextResponse.json(consumidores)
   } catch (error) {
-    return NextResponse.json({ error: 'Error al obtener clientes' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al obtener consumidores' }, { status: 500 })
   }
 }
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!nombre) {
       return NextResponse.json({ error: 'Nombre es requerido' }, { status: 400 })
     }
-    const cliente = await db.cliente.create({
+    const consumidor = await db.consumidor.create({
       data: {
         nombre,
         telefono: telefono || null,
@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
         notas: notas || null,
       },
     })
-    return NextResponse.json(cliente, { status: 201 })
+    return NextResponse.json(consumidor, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: 'Error al crear cliente' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al crear consumidor' }, { status: 500 })
   }
 }

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,6 +21,26 @@ model Ingrediente {
 
   platosIngredientes  PlatoIngrediente[]
   bolsonesIngredientes BolsonIngrediente[]
+  historialPrecios    HistorialPrecio[]
+}
+
+// Auditoría de precios: cada cambio de precio de un ingrediente queda
+// registrado como un tramo con vigencia "desde" una fecha determinada.
+// El precio vigente de un tramo se mantiene hasta que se registre el
+// siguiente cambio (o hasta hoy, si es el tramo más reciente).
+model HistorialPrecio {
+  id             String   @id @default(cuid())
+  ingredienteId  String
+  precio         Float
+  precioAnterior Float?
+  vigenciaDesde  DateTime @default(now())
+  usuario        String?
+  motivo         String?
+  createdAt      DateTime @default(now())
+
+  ingrediente Ingrediente @relation(fields: [ingredienteId], references: [id], onDelete: Cascade)
+
+  @@index([ingredienteId, vigenciaDesde])
 }
 
 model Plato {
@@ -74,7 +94,7 @@ model BolsonIngrediente {
   @@id([bolsonId, ingredienteId])
 }
 
-model Cliente {
+model Consumidor {
   id        String   @id @default(cuid())
   nombre    String
   telefono  String?
@@ -89,7 +109,7 @@ model Cliente {
 
 model Pedido {
   id         String   @id @default(cuid())
-  clienteId  String
+  consumidorId  String
   tipo       String   @default("PLATO")
   platoId    String?
   bolsonId   String?
@@ -100,7 +120,7 @@ model Pedido {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  consumidor Consumidor @relation(fields: [consumidorId], references: [id], onDelete: Cascade)
   plato   Plato?  @relation(fields: [platoId], references: [id], onDelete: SetNull)
   bolson  Bolson? @relation(fields: [bolsonId], references: [id], onDelete: SetNull)
 }

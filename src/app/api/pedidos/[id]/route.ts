@@ -6,7 +6,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const { id } = await params
     const pedido = await db.pedido.findUnique({
       where: { id },
-      include: { cliente: true, plato: true, bolson: true },
+      include: { consumidor: true, plato: true, bolson: true },
     })
     if (!pedido) {
       return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const pedido = await db.pedido.update({
       where: { id },
       data: {
-        clienteId: body.clienteId,
+        consumidorId: body.consumidorId,
         tipo: body.tipo,
         platoId: body.platoId ?? null,
         bolsonId: body.bolsonId ?? null,
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         notas: body.notas ?? null,
         total: Number(body.total),
       },
-      include: { cliente: true, plato: true, bolson: true },
+      include: { consumidor: true, plato: true, bolson: true },
     })
     return NextResponse.json(pedido)
   } catch (error) {

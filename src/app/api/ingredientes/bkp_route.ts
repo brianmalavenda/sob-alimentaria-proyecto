@@ -33,13 +33,6 @@ export async function POST(request: NextRequest) {
         stock: Number(stock) || 0,
         unidad: unidad || 'kg',
         categoria: categoria || 'General',
-        historialPrecios: {
-          create: {
-            precio: Number(precio),
-            precioAnterior: null,
-            motivo: 'Precio inicial cargado en el sistema',
-          },
-        },
       },
     })
     return NextResponse.json(ingrediente, { status: 201 })

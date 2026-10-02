@@ -48,7 +48,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 
-interface Cliente {
+interface Consumidor {
   id: string
   nombre: string
   telefono: string | null
@@ -70,7 +70,7 @@ interface Bolson {
 
 interface Pedido {
   id: string
-  clienteId: string
+  consumidorId: string
   tipo: string
   platoId: string | null
   bolsonId: string | null
@@ -79,7 +79,7 @@ interface Pedido {
   notas: string | null
   total: number
   createdAt: string
-  cliente?: Cliente
+  consumidor?: Consumidor
   plato?: Plato | null
   bolson?: Bolson | null
 }
@@ -87,7 +87,7 @@ interface Pedido {
 interface Dashboard {
   totalPlatos: number
   totalBolsones: number
-  totalClientes: number
+  totalConsumidores: number
   pedidosPorEstado: Record<string, number>
   pedidosHoy: number
 }
@@ -125,14 +125,14 @@ export default function TicketeraSection() {
   const [loading, setLoading] = useState(true)
   const [estadoFilter, setEstadoFilter] = useState('')
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
-  const [clientes, setClientes] = useState<Cliente[]>([])
+  const [consumidores, setConsumidores] = useState<Consumidor[]>([])
   const [platos, setPlatos] = useState<Plato[]>([])
   const [bolsones, setBolsones] = useState<Bolson[]>([])
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   // Create form
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [formCliente, setFormCliente] = useState('')
+  const [formConsumidor, setFormConsumidor] = useState('')
   const [formTipo, setFormTipo] = useState<'PLATO' | 'BOLSON'>('PLATO')
   const [formItemId, setFormItemId] = useState('')
   const [formCantidad, setFormCantidad] = useState(1)
@@ -160,11 +160,11 @@ export default function TicketeraSection() {
     } catch { /* ignore */ }
   }, [])
 
-  const fetchClientes = useCallback(async () => {
+  const fetchConsumidores = useCallback(async () => {
     try {
-      const res = await fetch('/api/clientes')
+      const res = await fetch('/api/consumidores')
       const data = await res.json()
-      setClientes(data)
+      setConsumidores(data)
     } catch { /* ignore */ }
   }, [])
 
@@ -187,10 +187,10 @@ export default function TicketeraSection() {
   useEffect(() => {
     fetchPedidos()
     fetchDashboard()
-    fetchClientes()
+    fetchConsumidores()
     fetchPlatos()
     fetchBolsones()
-  }, [fetchPedidos, fetchDashboard, fetchClientes, fetchPlatos, fetchBolsones])
+  }, [fetchPedidos, fetchDashboard, fetchConsumidores, fetchPlatos, fetchBolsones])
 
   // Auto-calculate total
   useEffect(() => {
@@ -204,7 +204,7 @@ export default function TicketeraSection() {
   }, [formTipo, formItemId, formCantidad, platos, bolsones])
 
   const openCreate = () => {
-    setFormCliente('')
+    setFormConsumidor('')
     setFormTipo('PLATO')
     setFormItemId('')
     setFormCantidad(1)
@@ -214,8 +214,8 @@ export default function TicketeraSection() {
   }
 
   const handleCreate = async () => {
-    if (!formCliente || !formItemId) {
-      toast({ title: 'Completá cliente y producto', variant: 'destructive' })
+    if (!formConsumidor || !formItemId) {
+      toast({ title: 'Completá consumidor y producto', variant: 'destructive' })
       return
     }
     try {
@@ -223,7 +223,7 @@ export default function TicketeraSection() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clienteId: formCliente,
+          consumidorId: formConsumidor,
           tipo: formTipo,
           platoId: formTipo === 'PLATO' ? formItemId : null,
           bolsonId: formTipo === 'BOLSON' ? formItemId : null,
@@ -307,8 +307,8 @@ export default function TicketeraSection() {
                 <Users className="w-5 h-5 text-sky-700" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-sky-800">{dashboard.totalClientes}</p>
-                <p className="text-xs text-sky-600">Clientes</p>
+                <p className="text-2xl font-bold text-sky-800">{dashboard.totalConsumidores}</p>
+                <p className="text-xs text-sky-600">Consumidores</p>
               </div>
             </CardContent>
           </Card>
@@ -415,7 +415,7 @@ export default function TicketeraSection() {
                         </Badge>
                       </div>
                       <div className="mt-1.5 flex items-center gap-3 flex-wrap">
-                        <span className="font-semibold text-sm">{pedido.cliente?.nombre || '—'}</span>
+                        <span className="font-semibold text-sm">{pedido.consumidor?.nombre || '—'}</span>
                         <span className="text-gray-500 text-sm">
                           {pedido.tipo === 'PLATO' ? pedido.plato?.nombre : pedido.bolson?.nombre}
                         </span>
@@ -472,13 +472,13 @@ export default function TicketeraSection() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Cliente *</Label>
-              <Select value={formCliente} onValueChange={setFormCliente}>
+              <Label>Consumidor *</Label>
+              <Select value={formConsumidor} onValueChange={setFormConsumidor}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar cliente" />
+                  <SelectValue placeholder="Seleccionar consumidor" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clientes.map((c) => (
+                  {consumidores.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.nombre} {c.telefono ? `(${c.telefono})` : ''}
                     </SelectItem>

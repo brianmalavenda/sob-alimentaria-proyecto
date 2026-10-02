@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const cliente = await db.cliente.findUnique({
+    const consumidor = await db.consumidor.findUnique({
       where: { id },
       include: {
         pedidos: {
@@ -13,12 +13,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         },
       },
     })
-    if (!cliente) {
-      return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 })
+    if (!consumidor) {
+      return NextResponse.json({ error: 'consumidor no encontrado' }, { status: 404 })
     }
-    return NextResponse.json(cliente)
+    return NextResponse.json(consumidor)
   } catch (error) {
-    return NextResponse.json({ error: 'Error al obtener cliente' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al obtener consumidor' }, { status: 500 })
   }
 }
 
@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params
     const body = await request.json()
-    const cliente = await db.cliente.update({
+    const consumidor = await db.consumidor.update({
       where: { id },
       data: {
         nombre: body.nombre,
@@ -36,18 +36,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         notas: body.notas ?? null,
       },
     })
-    return NextResponse.json(cliente)
+    return NextResponse.json(consumidor)
   } catch (error) {
-    return NextResponse.json({ error: 'Error al actualizar cliente' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al actualizar consumidor' }, { status: 500 })
   }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    await db.cliente.delete({ where: { id } })
+    await db.consumidor.delete({ where: { id } })
     return NextResponse.json({}, { status: 204 })
   } catch (error) {
-    return NextResponse.json({ error: 'Error al eliminar cliente' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al eliminar consumidor' }, { status: 500 })
   }
 }
