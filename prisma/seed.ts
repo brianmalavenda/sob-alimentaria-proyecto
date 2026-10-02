@@ -73,8 +73,21 @@ async function main() {
     db.ingrediente.create({ data: { nombre: 'Stevia', descripcion: 'Stevia en polvo', precio: 5000, stock: 5, unidad: 'kg', categoria: 'Especiales' } }),
   ])
 
-  // Helper
-  const ing = (nombre: string) => ingredientes.find(i => i.nombre === nombre)!
+  for (const item of listaIngredientes) {
+    const created = await db.ingrediente.create({
+      data: item,
+    })
+    ingredientesMap.set(item.nombre, created)
+  }
+
+  // Helper de búsqueda segura por nombre
+  const ing = (nombre: string) => {
+    const encontrado = ingredientesMap.get(nombre)
+    if (!encontrado) {
+      throw new Error(`El ingrediente "${nombre}" no existe en el mapa de semillas.`)
+    }
+    return encontrado
+  }
 
   // === HISTORIAL DE PRECIOS (Observatorio de Precios) ===
   for (const [nombre, tramos] of Object.entries(HISTORIAL_PRECIOS_DUMMY)) {
@@ -113,9 +126,9 @@ async function main() {
           { ingredienteId: ing('Ajo').id, cantidad: 0.01 },
           { ingredienteId: ing('Aceite de girasol').id, cantidad: 0.03 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato2 = await db.plato.create({
@@ -133,9 +146,9 @@ async function main() {
           { ingredienteId: ing('Aceite de girasol').id, cantidad: 0.1 },
           { ingredienteId: ing('Limón').id, cantidad: 0.05 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato3 = await db.plato.create({
@@ -154,9 +167,9 @@ async function main() {
           { ingredienteId: ing('Ajo').id, cantidad: 0.01 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
           { ingredienteId: ing('Pimienta').id, cantidad: 0.002 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato4 = await db.plato.create({
@@ -172,9 +185,9 @@ async function main() {
           { ingredienteId: ing('Cebolla').id, cantidad: 0.1 },
           { ingredienteId: ing('Aceite de girasol').id, cantidad: 0.05 },
           { ingredienteId: ing('Sal').id, cantidad: 0.005 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const plato5 = await db.plato.create({
@@ -193,16 +206,17 @@ async function main() {
           { ingredienteId: ing('Pimienta').id, cantidad: 0.005 },
           { ingredienteId: ing('Sal').id, cantidad: 0.01 },
           { ingredienteId: ing('Ajo').id, cantidad: 0.02 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
-  // === BOLSONES ===
+  // 4. Crear Bolsones
+  console.log('🛍️ Creando bolsones...')
   const bolson1 = await db.bolson.create({
     data: {
       nombre: 'Bolsón Carnicero',
-      descripcion: 'Seleccion de cortes de carne para la semana. Ideal para familias.',
+      descripcion: 'Selección de cortes de carne para la semana. Ideal para familias.',
       tipo: 'GENERAL',
       precio: 18000,
       ingredientes: {
@@ -210,15 +224,15 @@ async function main() {
           { ingredienteId: ing('Pechuga de pollo').id, cantidad: 1.5 },
           { ingredienteId: ing('Carne molida').id, cantidad: 1 },
           { ingredienteId: ing('Costilla de cerdo').id, cantidad: 1 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const bolson2 = await db.bolson.create({
     data: {
       nombre: 'Bolsón Verduras',
-      descripcion: 'Seleccion de verduras frescas de temporada. Paquete completo para la semana.',
+      descripcion: 'Selección de verduras frescas de temporada. Paquete completo para la semana.',
       tipo: 'GENERAL',
       precio: 8500,
       ingredientes: {
@@ -229,9 +243,9 @@ async function main() {
           { ingredienteId: ing('Tomate').id, cantidad: 1.5 },
           { ingredienteId: ing('Morrón rojo').id, cantidad: 0.5 },
           { ingredienteId: ing('Lechuga').id, cantidad: 1 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const bolson3 = await db.bolson.create({
@@ -248,9 +262,9 @@ async function main() {
           { ingredienteId: ing('Zanahoria').id, cantidad: 1 },
           { ingredienteId: ing('Edulcorante').id, cantidad: 0.5 },
           { ingredienteId: ing('Stevia').id, cantidad: 0.2 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   const bolson4 = await db.bolson.create({
@@ -267,9 +281,9 @@ async function main() {
           { ingredienteId: ing('Tomate').id, cantidad: 1 },
           { ingredienteId: ing('Huevo').id, cantidad: 1 },
           { ingredienteId: ing('Queso rallado').id, cantidad: 0.5 },
-        ]
-      }
-    }
+        ],
+      },
+    },
   })
 
   // === CONSUMIDORES ===
@@ -286,7 +300,8 @@ async function main() {
     data: { nombre: 'Carlos Rodríguez', telefono: '1155003456', email: 'carlos@email.com', direccion: 'Pasaje Colón 123' }
   })
 
-  // === PEDIDOS ===
+  // 6. Crear Pedidos
+  console.log('📦 Creando pedidos...')
   await db.pedido.create({
     data: {
       consumidorId: consumidor1.id,
@@ -295,8 +310,8 @@ async function main() {
       cantidad: 3,
       estado: 'ENTREGADO',
       total: 16500,
-      notas: 'Sin morrón por favor'
-    }
+      notas: 'Sin morrón por favor',
+    },
   })
   await db.pedido.create({
     data: {
@@ -306,7 +321,7 @@ async function main() {
       cantidad: 2,
       estado: 'LISTO',
       total: 15000,
-    }
+    },
   })
   await db.pedido.create({
     data: {
@@ -327,7 +342,7 @@ async function main() {
       cantidad: 1,
       estado: 'PENDIENTE',
       total: 14000,
-    }
+    },
   })
   await db.pedido.create({
     data: {
@@ -337,7 +352,7 @@ async function main() {
       cantidad: 1,
       estado: 'PENDIENTE',
       total: 8000,
-    }
+    },
   })
 
   const totalTramos = Object.values(HISTORIAL_PRECIOS_DUMMY).reduce((acc, t) => acc + t.length, 0)
@@ -352,5 +367,11 @@ async function main() {
 }
 
 main()
-  .catch(e => { console.error(e); process.exit(1) })
-  .finally(() => db.$disconnect())
+  .then(async () => {
+    await db.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error('❌ Error ejecutando el seed:', e)
+    await db.$disconnect()
+    process.exit(1)
+  })
