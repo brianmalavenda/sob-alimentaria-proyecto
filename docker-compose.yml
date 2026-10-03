@@ -2,19 +2,17 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: sob-alimentaria-db
-    restart: always
+    restart: unless-stopped
     environment:
-      - POSTGRES_USER=admin_negocio
-      - POSTGRES_PASSWORD=clave_segura_123
-      - POSTGRES_DB=comidas_db
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
     volumes:
-      - ./db/postgres-data:/var/lib/postgresql/data
+      - /docker/sob-alimentaria-app/db/postgres-data:/var/lib/postgresql/data
     networks:
       - sob_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin_negocio"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -28,68 +26,17 @@ services:
     restart: unless-stopped
     depends_on:
       postgres:
-        condition: service_healthy      
+        condition: service_healthy
     environment:
       - DEBUG=${DEBUG:-false}
-      - DATABASE_URL=postgresql://admin_negocio:clave_segura_123@postgres:5432/sob_db?schema=public
-      - NEXTAUTH_URL=http://localhost:3000
-    command: >
-      sh -c "
-        npx prisma migrate deploy &&
-        if [ \"$$DEBUG\" = \"true\" ]; then
-          echo '=== MODO DEBUG DETECTADO: Ejecutando seed... ===' &&
-          npx prisma db seed;
-        fi &&
-        npm run start:prod
-      "git
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     ports:
       - "3000:3000"
     volumes:
-      - ./db:/app/db
+      - /docker/sob-alimentaria-app/db:/app/db
     networks:
       - sob_net
 
 networks:
   sob_net:
     driver: bridge
-
-volumes:
-  postgres_data:
-
-
-## NOTAS  de implementaciones anteriores
-
-  # image: postgres:16-alpine
-    # container_name: sob-alimentaria-db
-    # restart: unless-stopped
-    # environment:
-    #   POSTGRES_USER: sob_user
-    #   POSTGRES_PASSWORD: sob_password
-    #   POSTGRES_DB: sob_db
-    # ports:
-    #   - "5432:5432"
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data
-    # networks:
-    #   - sob_net
-    
-  # caddy:
-  #   image: caddy:2-alpine
-  #   container_name: sob-alimentaria-caddy
-  #   restart: unless-stopped
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
-  #     - caddy_data:/data
-  #     - caddy_config:/config
-  #   depends_on:
-  #     - app
-  #   networks:
-  #     - sob_net
-
-# volumes:
-#   sob_db:
-  # caddy_data:
-  # caddy_config:
